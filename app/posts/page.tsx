@@ -1,9 +1,9 @@
 import {
   getAllPosts,
-  getAllAuthors,
+  getAllUsers,
   getAllTags,
   getAllCategories,
-  searchAuthors,
+  searchUsers,
   searchTags,
   searchCategories,
 } from "@/lib/wordpress";
@@ -48,7 +48,7 @@ export default async function Page({
   // Fetch data based on search parameters
   const [posts, authors, tags, categories] = await Promise.all([
     getAllPosts({ author, tag, category, search }),
-    search ? searchAuthors(search) : getAllAuthors(),
+    search ? searchUsers(search) : getAllUsers(),
     search ? searchTags(search) : getAllTags(),
     search ? searchCategories(search) : getAllCategories(),
   ]);

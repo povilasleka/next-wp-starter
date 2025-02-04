@@ -112,7 +112,7 @@ export interface Tag extends Taxonomy {
   taxonomy: "post_tag";
 }
 
-export interface Author {
+export interface User {
   id: number;
   name: string;
   url: string;

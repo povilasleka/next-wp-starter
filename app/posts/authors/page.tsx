@@ -1,4 +1,4 @@
-import { getAllAuthors } from "@/lib/wordpress";
+import { getAllUsers } from "@/lib/wordpress";
 import { Section, Container, Prose } from "@/components/craft";
 import { Metadata } from "next";
 import BackButton from "@/components/back";
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const authors = await getAllAuthors();
+  const authors = await getAllUsers();
 
   return (
     <Section>

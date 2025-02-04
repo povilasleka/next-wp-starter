@@ -1,3 +1,5 @@
+"use server"
+
 // Description: WordPress API functions
 // Used to fetch data from a WordPress site using the WordPress REST API
 // Types are imported from `wp.d.ts`
@@ -11,7 +13,7 @@ import {
   Category,
   Tag,
   Page,
-  Author,
+  User,
   FeaturedMedia,
 } from "./wordpress.d";
 
@@ -302,9 +304,9 @@ export async function getPageBySlug(slug: string): Promise<Page> {
   return response[0];
 }
 
-export async function getAllAuthors(): Promise<Author[]> {
+export async function getAllUsers(): Promise<User[]> {
   const url = getUrl("/wp-json/wp/v2/users");
-  const response = await wordpressFetch<Author[]>(url, {
+  const response = await wordpressFetch<User[]>(url, {
     next: {
       ...defaultFetchOptions.next,
       tags: ["wordpress", "authors"],
@@ -314,9 +316,9 @@ export async function getAllAuthors(): Promise<Author[]> {
   return response;
 }
 
-export async function getAuthorById(id: number): Promise<Author> {
+export async function getUserById(id: number): Promise<User> {
   const url = getUrl(`/wp-json/wp/v2/users/${id}`);
-  const response = await wordpressFetch<Author>(url, {
+  const response = await wordpressFetch<User>(url, {
     next: {
       ...defaultFetchOptions.next,
       tags: ["wordpress", `author-${id}`],
@@ -326,9 +328,9 @@ export async function getAuthorById(id: number): Promise<Author> {
   return response;
 }
 
-export async function getAuthorBySlug(slug: string): Promise<Author> {
+export async function getUserBySlug(slug: string): Promise<User> {
   const url = getUrl("/wp-json/wp/v2/users", { slug });
-  const response = await wordpressFetch<Author[]>(url, {
+  const response = await wordpressFetch<User[]>(url, {
     next: {
       ...defaultFetchOptions.next,
       tags: ["wordpress", `author-${slug}`],
@@ -338,22 +340,22 @@ export async function getAuthorBySlug(slug: string): Promise<Author> {
   return response[0];
 }
 
-export async function getPostsByAuthor(authorId: number): Promise<Post[]> {
-  const url = getUrl("/wp-json/wp/v2/posts", { author: authorId });
+export async function getPostsByUser(userId: number): Promise<Post[]> {
+  const url = getUrl("/wp-json/wp/v2/posts", { author: userId });
   const response = await wordpressFetch<Post[]>(url, {
     next: {
       ...defaultFetchOptions.next,
-      tags: ["wordpress", `author-${authorId}`],
+      tags: ["wordpress", `author-${userId}`],
     },
   });
 
   return response;
 }
 
-export async function getPostsByAuthorSlug(
+export async function getPostsByUserSlug(
   authorSlug: string
 ): Promise<Post[]> {
-  const author = await getAuthorBySlug(authorSlug);
+  const author = await getUserBySlug(authorSlug);
   const url = getUrl("/wp-json/wp/v2/posts", { author: author.id });
   const response = await wordpressFetch<Post[]>(url, {
     next: {
@@ -424,12 +426,12 @@ export async function searchTags(query: string): Promise<Tag[]> {
 }
 
 // Helper function to search across authors
-export async function searchAuthors(query: string): Promise<Author[]> {
+export async function searchUsers(query: string): Promise<User[]> {
   const url = getUrl("/wp-json/wp/v2/users", {
     search: query,
     per_page: 100,
   });
-  return wordpressFetch<Author[]>(url);
+  return wordpressFetch<User[]>(url);
 }
 
 // Helper function to revalidate WordPress data
@@ -443,6 +445,3 @@ export async function revalidateWordPressData(tags: string[] = ["wordpress"]) {
     throw new Error("Failed to revalidate WordPress data");
   }
 }
-
-// Export error class for error handling
-export { WordPressAPIError };

@@ -17,6 +17,17 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
+import {Toaster} from "@/components/ui/toaster";
+import {cookies} from "next/headers";
+import {logout} from "@/lib/auth";
+import {Avatar, AvatarFallback} from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 
 const font = FontSans({
   subsets: ["latin"],
@@ -33,11 +44,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const userDataString = (await cookies()).get('jwt_auth')?.value;
+  const user: User = JSON.parse(userDataString ?? '{}');
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
@@ -48,9 +62,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Nav />
+          <Nav user={user} />
           {children}
           <Footer />
+          <Toaster />
         </ThemeProvider>
         <Analytics />
       </body>
@@ -58,7 +73,9 @@ export default function RootLayout({
   );
 }
 
-const Nav = ({ className, children, id }: NavProps) => {
+const Nav = ({ className, children, id, user }: NavProps) => {
+  const isLoggedIn = JSON.stringify(user) !== "{}";
+
   return (
     <nav
       className={cn("sticky z-50 top-0 bg-background", "border-b", className)}
@@ -66,7 +83,7 @@ const Nav = ({ className, children, id }: NavProps) => {
     >
       <div
         id="nav-container"
-        className="max-w-5xl mx-auto py-4 px-6 sm:px-8 flex justify-between items-center"
+        className="max-w-5xl mx-auto py-4 px-6 sm:px-8 flex items-center"
       >
         <Link
           className="hover:opacity-75 transition-all flex gap-4 items-center"
@@ -83,8 +100,8 @@ const Nav = ({ className, children, id }: NavProps) => {
           <h2 className="text-sm">{siteConfig.site_name}</h2>
         </Link>
         {children}
-        <div className="flex items-center gap-2">
-          <div className="mx-2 hidden md:flex">
+        <div className="flex items-center gap-2 flex-grow">
+          <div className="mx-auto hidden md:flex">
             {Object.entries(mainMenu).map(([key, href]) => (
               <Button key={href} asChild variant="ghost" size="sm">
                 <Link href={href}>
@@ -93,9 +110,35 @@ const Nav = ({ className, children, id }: NavProps) => {
               </Button>
             ))}
           </div>
-          <Button asChild className="hidden sm:flex">
-            <Link href="https://github.com/9d8dev/next-wp">Get Started</Link>
-          </Button>
+          {isLoggedIn ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="cursor-pointer" asChild>
+                <Avatar>
+                  <AvatarFallback className="font-semibold text-sm text-white bg-black hover:bg-black/80 dark:invert">
+                    {user?.displayName?.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="mt-5 content-end w-44">
+                <DropdownMenuItem>Profile</DropdownMenuItem>
+                <DropdownMenuItem>Billing</DropdownMenuItem>
+                <DropdownMenuItem>Team</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout}>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="gap-2 items-center hidden md:flex">
+              <Button asChild variant="ghost">
+                <Link href="/auth/login">Login</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/auth/register">Create an account</Link>
+              </Button>
+            </div>
+          )}
           <MobileNav />
         </div>
       </div>
