@@ -1,0 +1,11 @@
+services:
+  wp-next-starter:
+    container_name: wp-next-starter
+    image: wp-next-starter
+    build: .
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      - WORDPRESS_URL=${WORDPRESS_URL}
+      - WORDPRESS_HOSTNAME=${WORDPRESS_HOSTNAME}
