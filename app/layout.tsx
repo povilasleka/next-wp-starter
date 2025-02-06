@@ -75,18 +75,59 @@ export default async function RootLayout({
 
 const Nav = ({ className, children, id, user }: NavProps) => {
   const isLoggedIn = JSON.stringify(user) !== "{}";
+  const isAuthEnabled = process.env.ENABLE_USER_AUTH === "true";
+
+  function renderAuth() {
+    if (!isAuthEnabled) {
+      return null;
+    }
+
+    if (isLoggedIn) {
+      return (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="cursor-pointer" asChild>
+              <Avatar>
+                <AvatarFallback className="font-semibold text-sm text-white bg-black hover:bg-black/80 dark:invert">
+                  {user?.displayName?.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="mt-5 content-end w-44">
+              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem>Billing</DropdownMenuItem>
+              <DropdownMenuItem>Team</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout}>
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+      )
+    } else {
+      return (
+          <div className="gap-2 items-center hidden md:flex">
+            <Button asChild variant="ghost">
+              <Link href="/auth/login">Login</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/auth/register">Create an account</Link>
+            </Button>
+          </div>
+      )
+    }
+  }
 
   return (
-    <nav
-      className={cn("sticky z-50 top-0 bg-background", "border-b", className)}
-      id={id}
-    >
-      <div
-        id="nav-container"
-        className="max-w-5xl mx-auto py-4 px-6 sm:px-8 flex items-center"
+      <nav
+          className={cn("sticky z-50 top-0 bg-background", "border-b", className)}
+          id={id}
       >
-        <Link
-          className="hover:opacity-75 transition-all flex gap-4 items-center"
+        <div
+            id="nav-container"
+            className="max-w-5xl mx-auto py-4 px-6 sm:px-8 flex items-center"
+        >
+          <Link
+              className="hover:opacity-75 transition-all flex gap-4 items-center"
           href="/"
         >
           <Image
@@ -110,35 +151,7 @@ const Nav = ({ className, children, id, user }: NavProps) => {
               </Button>
             ))}
           </div>
-          {isLoggedIn ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger className="cursor-pointer" asChild>
-                <Avatar>
-                  <AvatarFallback className="font-semibold text-sm text-white bg-black hover:bg-black/80 dark:invert">
-                    {user?.displayName?.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="mt-5 content-end w-44">
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Billing</DropdownMenuItem>
-                <DropdownMenuItem>Team</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <div className="gap-2 items-center hidden md:flex">
-              <Button asChild variant="ghost">
-                <Link href="/auth/login">Login</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/auth/register">Create an account</Link>
-              </Button>
-            </div>
-          )}
+          {renderAuth()}
           <MobileNav />
         </div>
       </div>

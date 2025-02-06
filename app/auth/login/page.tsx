@@ -1,8 +1,7 @@
 import {Metadata} from "next";
 import LoginPage from "@/app/auth/login/LoginPage";
-import {cookies} from "next/headers";
 import {redirect} from "next/navigation";
-
+import {isAuthenticated} from "@/lib/auth";
 
 export const metadata: Metadata = {
     title: "Login",
@@ -13,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-    if ((await cookies()).get('jwt_auth')) {
+    if (await isAuthenticated() || process.env.ENABLE_USER_AUTH !== 'true') {
         redirect('/');
     }
 

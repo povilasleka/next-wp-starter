@@ -15,6 +15,7 @@ import {
   Page,
   User,
   FeaturedMedia,
+  CreateUserRequest,
 } from "./wordpress.d";
 
 // WordPress Config
@@ -31,6 +32,8 @@ interface FetchOptions {
     tags?: string[];
   };
   headers?: HeadersInit;
+  method?: "GET" | "POST" | "PUT" | "DELETE",
+  body?: string;
 }
 
 function getUrl(path: string, query?: Record<string, any>) {
@@ -47,7 +50,9 @@ const defaultFetchOptions: FetchOptions = {
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
+    Authorization: `Basic ${btoa(process.env.WORDPRESS_APPLICATION_CREDENTIALS ?? "")}`,
   },
+  method: "GET",
 };
 
 // Error handling utility
@@ -65,7 +70,6 @@ async function wordpressFetch<T>(
 ): Promise<T> {
   const headersList = await headers();
   const userAgent = headersList.get("user-agent") || "Next.js WordPress Client";
-
   const response = await fetch(url, {
     ...defaultFetchOptions,
     ...options,
@@ -80,7 +84,7 @@ async function wordpressFetch<T>(
     throw new WordPressAPIError(
       `WordPress API request failed: ${response.statusText}`,
       response.status,
-      url
+      url,
     );
   }
 
@@ -338,6 +342,26 @@ export async function getUserBySlug(slug: string): Promise<User> {
   });
 
   return response[0];
+}
+
+export async function createUser(user: CreateUserRequest): Promise<User> {
+  const url = getUrl("/wp-json/wp/v2/users");
+  const response = await fetch(url, {
+    ...defaultFetchOptions,
+    method: "POST",
+    body: JSON.stringify(user),
+  });
+
+  if (!response.ok) {
+    const json = await response.json();
+    throw new WordPressAPIError(
+      `Failed to create user: ${Object.values(json.data.params).join(', ')}`,
+      response.status,
+      url,
+    )
+  }
+
+  return response.json();
 }
 
 export async function getPostsByUser(userId: number): Promise<Post[]> {

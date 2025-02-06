@@ -123,6 +123,12 @@ export interface User {
   meta: Record<string, unknown>;
 }
 
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  password: string;
+}
+
 // Block types
 interface BlockSupports {
   align?: boolean | string[];

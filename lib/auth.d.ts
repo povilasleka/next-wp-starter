@@ -1,9 +1,9 @@
-export interface LoginResponse {
+export interface AuthResponse {
     success: boolean;
     errors: string[];
 }
 
-export interface TokenResponse {
+export interface Token {
     token: string;
     user_email: string;
     user_nicename: string;
